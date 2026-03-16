@@ -1,0 +1,54 @@
+const mongoose = require("mongoose");
+
+
+const ledgerSchema = new mongoose.Schema({
+    account : {
+        type: mongoose.Types.ObjectId,
+        ref: "account",
+        required: true,
+        index: true,
+        immutable: true,
+    },
+
+    amount : {
+        type: Number,
+        required: [ true, "Amount is required for creating an Account" ],
+        immutable: true,
+    },
+
+    transaction : {
+        type: mongoose.Types.ObjectId,
+        ref: "transaction",
+        required: [ true, "Ledger must be associated with a transaction "],
+        index: true,
+        immutable: true,
+    },
+
+    type: {
+        type: String,
+        enum: {
+            values : [ "CREDIT" , "DEBIT"],
+            message: "Type can be either CREDIT or DEBIT"
+        },
+        required:  [true,  "Ledger typr is required" ],
+        immutable: true,
+    }
+})
+
+function preventLedgerModification () {
+    throw new Error("Ledger entries are immutable and cannot be modified or deleted") ;
+}
+
+ledgerSchema.pre('findOneAndUpdate', preventLedgerModification);
+ledgerSchema.pre('updateOne', preventLedgerModification);
+ledgerSchema.pre('deleteOne', preventLedgerModification);
+ledgerSchema.pre('replaceOne', preventLedgerModification);
+ledgerSchema.pre('deleteMany', preventLedgerModification);
+ledgerSchema.pre('deleteOne', preventLedgerModification);
+ledgerSchema.pre('updateMany', preventLedgerModification);
+ledgerSchema.pre('remove', preventLedgerModification);
+
+const ledgerModel = mongoose.Model("ledger", ledgerSchema) ;
+
+
+model.exports = ledgerModel ;
